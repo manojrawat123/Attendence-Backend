@@ -17,6 +17,8 @@ from math import radians, sin, cos, sqrt, atan2
 from django.db import IntegrityError
 from leave.models import Leave
 import calendar
+from attendence_tracer.monthAttendence import attendance_data_func_month
+from employee.models import EmployeeUser
 
 def validateLocation(latitude, longitude):
     try:
@@ -40,7 +42,7 @@ def validateLocation(latitude, longitude):
         return Response({"error" : "Unable to get Location"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-def attendence_data_func(attendence_detail, leave_detail):
+def attendence_data_func_year(attendence_detail, leave_detail):
     attendance_data = {}
     for i in range(1, 13):
         month_name = calendar.month_name[i]
@@ -56,25 +58,27 @@ def attendence_data_func(attendence_detail, leave_detail):
             attendance_data[month]["half_days"] += 1   
     return attendance_data
 
-
 # Create your views here.
 class CheckInView(APIView):
     permission_classes = [IsAuthenticated]
     time = datetime.now().time()
+
     def get(self, request, id = None):
         if id is not None:
             if request.user.is_superuser or request.user.id == id:
-                attendence_detail = Attendence.objects.filter(Q(employee_user = id))
+                year = request.GET.get("year")
+                attendence_detail = Attendence.objects.filter(Q(employee_user = id) & Q(date__year=year))
                 leave_detail = Leave.objects.filter(Q(employee_user = id))
-                attendance_data = attendence_data_func(attendence_detail, leave_detail)
+                attendance_data = attendence_data_func_year(attendence_detail, leave_detail)
                 return Response(attendance_data, status = status.HTTP_200_OK)
             else:
                 return Response({"message" : "You are not Authenticated"}, status = status.HTTP_400_BAD_REQUEST)
         else:
             attendence_detail = Attendence.objects.filter(Q(employee_user = request.user.id))
             leave_detail = Leave.objects.filter(Q(employee_user = request.user.id))    
-            attendance_data = attendence_data_func(attendence_detail, leave_detail)
+            attendance_data = attendence_data_func_year(attendence_detail, leave_detail)
             return Response(attendance_data, status= status.HTTP_200_OK)                
+
     def post(self, request, id = None):
         try:
             longitude = request.data.get('longitude')
@@ -107,8 +111,9 @@ class CheckInView(APIView):
         except Exception as e:
             print(e)
             return Response({"error" : "Internal server error" }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
     def put(self, request, id = None):
+
         try:
             if id is None:
                 return Response({"error" : "method not allowed"}, status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -125,7 +130,7 @@ class CheckInView(APIView):
                 validateLocation(latitude = lattitude, longitude = longitude)
                 checkin_date = attendence.date
                 if(checkin_date == date):
-                    attendence_serializer = MyAttendenceSerializer(attendence, data={
+                    attendence_serializer = MyAttendenceSerializer(attendence, data={ 
                     "check_out_time" : time
                     }, partial = True)
                     if attendence_serializer.is_valid():
@@ -145,6 +150,25 @@ class CheckInView(APIView):
                         return Response(attendence_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     return Response({"error" : "Checkout should on the same day"}, status= status.HTTP_400_BAD_REQUEST)
-                
         except Exception as e:
             return Response({"error" : "Internal server error" }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class GetDataMonthWise(APIView):
+    def get(self, request, id = None):
+        try:
+            if id is not None:
+                if(request.user.id == id or request.user.is_superuser):
+                    user = EmployeeUser.objects.get(id = id)
+                    year = int(request.GET.get("year"))
+                    month = datetime.strptime(request.GET.get("month"), '%B').month
+                    month_data = attendance_data_func_month(user, month, year)
+                    return Response(month_data, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error" : "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error" : "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            print(e)
+            return Response({"error" : "Internal server Error"}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)

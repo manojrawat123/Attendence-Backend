@@ -167,7 +167,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 PASSWORD_RESET_TIMEOUT=900        
 CORS_ALLOWED_ORIGINS = [
     # "exp://192.168.29.63:8081"
-    "*"
+    "exp://192.168.29.187:8081"
 ]
 
 # Optional: Allow all headers and methods for simplicity in development
