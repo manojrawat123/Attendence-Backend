@@ -93,7 +93,7 @@ class CheckInView(APIView):
                 try:
                     name = request.user.name
                     user_email = request.user.email
-                    email_1 = EmailMessage(f"{name} ", f"Checkin Successfully", 'simply2cloud@gmail.com',["positive.mind.123456789@gmail.com"])
+                    email_1 = EmailMessage(f"{name} ", f"Checkin Successfully", 'simply2cloud@gmail.com',["vikas.sharma@simply2cloud.com"])
                     email_2 = EmailMessage("Congrulation you Checkin Successfully!!", f"You checkin at {time}", 'simply2cloud@gmail.com',[user_email])
                     email_1.send()
                     email_2.send()
