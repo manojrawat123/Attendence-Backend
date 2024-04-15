@@ -35,18 +35,20 @@ def validateLocation(latitude, longitude):
         a = sin(dlat / 2)**2 + cos(specified_latitude) * cos(provided_latitude) * sin(dlon / 2)**2
         c = 2 * atan2(sqrt(a), sqrt(1 - a))
         distance = 6371 * c * 1000  # Radius of the Earth in
-
+        str_dis = "{:.2f}".format(distance)
         if distance > 100:
-            email = EmailMessage("Checkin Failed", f"lattitude: {latitude}, longitude: {longitude}  {distance} meters", 'simply2cloud@gmail.com',["positive.mind.123456789@gmail.com"])
+            email = EmailMessage("Checkin Failed", f"lattitude: {latitude}, longitude: {longitude} Distance : {str_dis} meters", 'simply2cloud@gmail.com',["positive.mind.123456789@gmail.com"])
             email.send()
             return False
         else:
-            email = EmailMessage(f"{distance} meters", 'simply2cloud@gmail.com',["positive.mind.123456789@gmail.com", "bahimunna457@gmail.com"])
+            email = EmailMessage(f"{str_dis} meters", f"lattitude: {latitude}, longitude: {longitude} Distance : {str_dis} meters" , 'simply2cloud@gmail.com',["positive.mind.123456789@gmail.com", "bahimunna457@gmail.com"])
             email.send()
-            return distance
+            return str_dis
     except Exception as e:
         print(e)
-        return Response({"error" : "Unable to get Location"}, status=status.HTTP_400_BAD_REQUEST)
+        email = EmailMessage(f"Somme Error occured",f"{e}", 'simply2cloud@gmail.com',["positive.mind.123456789@gmail.com", "bahimunna457@gmail.com"])
+        email.send()
+        return False
 
 
 def attendence_data_func_year(attendence_detail, leave_detail):
@@ -93,8 +95,6 @@ class CheckInView(APIView):
             time = datetime.now().time().strftime("%H:%M")
             is_valid = validateLocation(latitude=lattitude, longitude=longitude)
             if is_valid == False:
-                email_1 = EmailMessage("CheckIn Failed", "Checkin Failed at {time} ", 'simply2cloud@gmail.com',["positive.mind.123456789@gmail.com"])
-                email_1.send()
                 return Response({"error":"Invalid Location"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 attendence_serializer = MyAttendenceSerializer(data={
@@ -105,7 +105,7 @@ class CheckInView(APIView):
                     try:
                         name = request.user.name
                         user_email = request.user.email
-                        email_1 = EmailMessage(f"{name} ", f"Checkin Successfully at {time} Distance from the office -: {is_valid}meters", 'simply2cloud@gmail.com',["vikas.sharma@simply2cloud.com", "positive.mind.123456789@gmail.com"])
+                        email_1 = EmailMessage(f"{name} ", f"Checkin Successfully at {time} Distance from the office -: {is_valid} meters", 'simply2cloud@gmail.com',["vikas.sharma@simply2cloud.com", "positive.mind.123456789@gmail.com"])
                         email_2 = EmailMessage("Successfully Checked In!!", f"You checkin at {time}", 'simply2cloud@gmail.com',[user_email])
                         email_1.send()
                         email_2.send()
@@ -140,28 +140,32 @@ class CheckInView(APIView):
                 print({"lattitude" : lattitude,
                     "longitude" : longitude})
                 is_valid = validateLocation(latitude = lattitude, longitude = longitude)
-                checkin_date = attendence.date
-                if(checkin_date == date):
-                    attendence_serializer = MyAttendenceSerializer(attendence, data={
-                    "check_out_time" : time
-                    }, partial = True)
-                    if attendence_serializer.is_valid():
-                        attendence_serializer.save()
-                        try:
-                            name = request.user.name
-                            user_email = request.user.email
-                            email_1 = EmailMessage(f"{name}", f" Check Out Successfully at {time}", 'simply2cloud@gmail.com',["positive.mind.123456789@gmail.com"])
-                            email_2 = EmailMessage("You CheckOut Successfully", f"You check Out at {time}", 'simply2cloud@gmail.com',[user_email])
-                            email_1.send()
-                            email_2.send()
-                        except Exception as e:
-                            print("email failed")
-                            print(e)
-                        return Response({"message" : "Checkout Successfully!"}, status=status.HTTP_200_OK)
+                if is_valid != False:
+
+                    checkin_date = attendence.date
+                    if(checkin_date == date):
+                        attendence_serializer = MyAttendenceSerializer(attendence, data={
+                        "check_out_time" : time
+                        }, partial = True)
+                        if attendence_serializer.is_valid():
+                            attendence_serializer.save()
+                            try:
+                                name = request.user.name
+                                user_email = request.user.email
+                                email_1 = EmailMessage(f"{name} ", f"Checkin Successfully at {time} Distance from the office -: {is_valid} meters", 'simply2cloud@gmail.com',["vikas.sharma@simply2cloud.com", "positive.mind.123456789@gmail.com"])
+                                email_2 = EmailMessage("You CheckOut Successfully", f"You check Out at {time}", 'simply2cloud@gmail.com',[user_email])
+                                email_1.send()
+                                email_2.send()
+                            except Exception as e:
+                                print("email failed")
+                                print(e)
+                            return Response({"message" : "Checkout Successfully!"}, status=status.HTTP_200_OK)
+                        else:
+                            return Response(attendence_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                     else:
-                        return Response(attendence_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({"error" : "Checkout should on the same day"}, status= status.HTTP_400_BAD_REQUEST)
                 else:
-                    return Response({"error" : "Checkout should on the same day"}, status= status.HTTP_400_BAD_REQUEST)
+                    return Response({"error" : "Invalid Location"}, status = status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error" : "Internal server error" }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

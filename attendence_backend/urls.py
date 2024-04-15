@@ -27,6 +27,7 @@ urlpatterns = [
     path('checkin/', CheckInView.as_view(), name = "Check In User"),
     path('checkin/<int:id>/', CheckInView.as_view(), name = "Check out User"),
     path('leave/', GetLeaveApiView.as_view(), name = "Leave Api View"),
+    path('leave/<int:id>/', GetLeaveApiView.as_view(), name = "Leave Api View"),
     path('get_employee_detail/', GetUserInfoAdmin.as_view(), name = "Get User Information"),
     path('get_month_data/', GetDataMonthWise.as_view(), name = "Get Month Data"),
     path('get_month_data/<int:id>/', GetDataMonthWise.as_view(), name = "Get Month Data")
