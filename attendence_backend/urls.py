@@ -15,13 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from employee.views import MyEmployeeLoginView, CheckEmailApi, CreateEmployeeUserView,GetUserInfoAdmin
+from employee.views import MyEmployeeLoginView, CheckEmailApi, CreateEmployeeUserView,GetUserInfoAdmin, ProfileView
 from attendence_tracer.views import CheckInView, GetDataMonthWise
 from leave.views import GetLeaveApiView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', MyEmployeeLoginView.as_view(), name= "login"),
+    path('profile/', ProfileView.as_view(), name="profile"),
     path('register/', CreateEmployeeUserView.as_view(), name = "register"),
     path('emailcheck/', CheckEmailApi.as_view(), name = "Email Check"),
     path('checkin/', CheckInView.as_view(), name = "Check In User"),
@@ -30,5 +31,5 @@ urlpatterns = [
     path('leave/<int:id>/', GetLeaveApiView.as_view(), name = "Leave Api View"),
     path('get_employee_detail/', GetUserInfoAdmin.as_view(), name = "Get User Information"),
     path('get_month_data/', GetDataMonthWise.as_view(), name = "Get Month Data"),
-    path('get_month_data/<int:id>/', GetDataMonthWise.as_view(), name = "Get Month Data")
+    path('get_month_data/<int:id>/', GetDataMonthWise.as_view(), name = "Get Month Data"),
 ]

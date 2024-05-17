@@ -41,15 +41,15 @@ class GetLeaveApiView(APIView):
                     my_leave_serializer.save()
                     email = EmailMessage(f"{employee_user.name} Applied for a leave",f"Leave Applied for {date}",'simply2cloud@gmail.com',["positive.mind.123456789@gmail.com", "vikas.sharma@simply2cloud.com"])
                     email.send()
-                    return Response({"message" : "Leave Granted Successfully"})
+                    return Response({"message" : "Leave Granted Successfully"}, status=status.HTTP_200_OK)
                 else:
                     if 'non_field_errors' in my_leave_serializer.errors and 'unique' in my_leave_serializer.errors['non_field_errors'][0].code:
                         return Response({"error" : "Leave For this date Is already Taken"}, status=status.HTTP_400_BAD_REQUEST)
                     return Response(my_leave_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             elif date < toDate:
                 one_day = timedelta(days = 1)
-                start_date = datetime.strptime('2024-04-11', '%Y-%m-%d')
-                end_date = datetime.strptime('2024-06-11', '%Y-%m-%d')
+                start_date = datetime.strptime(date, '%Y-%m-%d')
+                end_date = datetime.strptime(toDate, '%Y-%m-%d')
 
                 current_date = start_date
                 while(current_date <= end_date):
@@ -69,7 +69,7 @@ class GetLeaveApiView(APIView):
                 email = EmailMessage(f"{employee_user.name} Applied for a leave",f"Leave Applied form {date} to {toDate}",'simply2cloud@gmail.com',["positive.mind.123456789@gmail.com", "vikas.sharma@simply2cloud.com"])
                 email.send()
                 return Response({"message" : "Leave Granted Successfully"})
-
+            return Response({"error": "Invalid request"}, status=status.HTTP_400_BAD_REQUEST)
         except IntegrityError as e:
             return Response({"error": "Some Error Occured"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
