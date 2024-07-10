@@ -53,6 +53,7 @@ class CreateEmployeeUserView(APIView):
                 data = serializer.save()
                 user = EmployeeUser.objects.get(email= request.data.get("email"))
                 user.is_active = True
+                user.date_of_birth = request.data.get('date_of_birth') if request.data.get('date_of_birth') is not None else None
                 user.save()
                 return Response({"message": "Registration Successfully Verify link Send to Your Email"})
             else:
@@ -107,7 +108,6 @@ class ProfileView(APIView):
                 if attendence.check_in_time and attendence.check_out_time is None:
                     print(attendence.check_in_time)
                     current_time = timezone.localtime(timezone.now()).time()
-
                     # Calculate the time difference in seconds
                     time_diff_seconds = (datetime.combine(datetime.today(), current_time) - datetime.combine(datetime.today(), attendence.check_in_time)).total_seconds()
                     show_checkout = True if time_diff_seconds > 14400 else False

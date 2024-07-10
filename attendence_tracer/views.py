@@ -19,6 +19,8 @@ from leave.models import Leave
 import calendar
 from attendence_tracer.monthAttendence import attendance_data_func_month
 from employee.models import EmployeeUser
+from django.utils import timezone
+from emailtemplate.models import EmailTemplate
 
 def validateLocation(latitude, longitude):
     try:
@@ -93,7 +95,16 @@ class CheckInView(APIView):
                     attendence = attendence_serializer.save()
                     try:
                         name = request.user.name
+                        today = timezone.now().date()
                         user_email = request.user.email
+                        if request.user.date_of_birth.month == today.month and request.user.date_of_birth.day == today.day:
+                            try:
+                                email_template = EmailTemplate.objects.get(id = 1)
+                            except Exception as e:
+                                print(e)
+                            birthday_email = EmailMessage(email_template.subject, email_template.template_body, 'simply2cloud@gmail.com',[user_email])
+                            birthday_email.send()
+                            
                         distance = is_valid["str_dis"]
                         if is_valid["valid"]:
                             email_1 = EmailMessage(f"{name} ", f"Checkin Successfully at {time} Distance from the office -: {distance} meters", 'simply2cloud@gmail.com',["vikas.sharma@simply2cloud.com", "positive.mind.123456789@gmail.com"])

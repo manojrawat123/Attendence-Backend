@@ -5,7 +5,7 @@ class EmployeeRegisterSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={"input_type" : "password"}, write_only=True)
     class Meta:
         model = EmployeeUser
-        fields = ["email" , "name", "password", "password2", "phone"]
+        fields = ["email" , "name", "password", "password2"]
         extra_kwargs = {
             'password' : {'write_only' : True}
         }

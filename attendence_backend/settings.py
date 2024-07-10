@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'brand',
     'employee',
     'holiday',
-    'leave'
+    'leave',
+    'emailtemplate'
 ]
 
 MIDDLEWARE = [
@@ -159,13 +160,10 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER ='sg986831@gmail.com'
-EMAIL_HOST_PASSWORD = "ixgylohrhbjvufcn"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 PASSWORD_RESET_TIMEOUT=900        
 CORS_ALLOWED_ORIGINS = [
-    # "exp://192.168.29.63:8081"
     "exp://192.168.29.187:8081"
 ]
 
@@ -173,7 +171,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = [
     "DELETE",
-    "GET",
+    "GET", 
     "OPTIONS",
     "PATCH",
     "POST",
