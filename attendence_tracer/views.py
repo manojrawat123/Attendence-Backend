@@ -99,11 +99,28 @@ class CheckInView(APIView):
                         user_email = request.user.email
                         if request.user.date_of_birth.month == today.month and request.user.date_of_birth.day == today.day:
                             try:
-                                email_template = EmailTemplate.objects.get(id = 1)
+                                # Fetch the email template from the database
+                                email_template = EmailTemplate.objects.get(id=1)
+                                signature_text = email_template.signature.replace('\\n', '\n')
+                                birthday_message = f"{email_template.template_body}\n\n{signature_text}"
+
+                                # Create the email message object
+                                birthday_email = EmailMessage(
+                                    email_template.subject,  # Subject of the email
+                                    birthday_message,       # Body of the email
+                                    'simply2cloud@gmail.com',  # From email
+                                    [user_email]            # To email
+                                )
+
+                                # Send the email
+                                birthday_email.send()
+
+                            except EmailTemplate.DoesNotExist:
+                                # Handle the case where the email template does not exist
+                                print("EmailTemplate with ID 1 does not exist.")
                             except Exception as e:
-                                print(e)
-                            birthday_email = EmailMessage(email_template.subject, email_template.template_body, 'simply2cloud@gmail.com',[user_email])
-                            birthday_email.send()
+                                # Handle other possible exceptions
+                                print(f"An error occurred: {e}")
                             
                         distance = is_valid["str_dis"]
                         if is_valid["valid"]:
