@@ -20,6 +20,7 @@ import calendar
 from attendence_tracer.monthAttendence import attendance_data_func_month
 from employee.models import EmployeeUser
 from django.utils import timezone
+from django.core.mail import EmailMultiAlternatives
 from emailtemplate.models import EmailTemplate
 
 def validateLocation(latitude, longitude):
@@ -92,7 +93,7 @@ class CheckInView(APIView):
                 "employee_user" : request.data.get("user")
                 })
                 if attendence_serializer.is_valid():
-                    attendence = attendence_serializer.save()
+                    # attendence = attendence_serializer.save()
                     try:
                         name = request.user.name
                         today = timezone.now().date()
@@ -101,23 +102,21 @@ class CheckInView(APIView):
                             try:
                                 # Fetch the email template from the database
                                 email_template = EmailTemplate.objects.get(id=1)
-                                signature_text = email_template.signature.replace('\\n', '\n')
-                                birthday_message = f"{email_template.template_body}\n\n{signature_text}"
-
-                                # Create the email message object
-                                birthday_email = EmailMessage(
-                                    email_template.subject,  # Subject of the email
-                                    birthday_message,       # Body of the email
-                                    'simply2cloud@gmail.com',  # From email
-                                    [user_email]            # To email
+                                # Prepare the text content
+                                signature_text = email_template.signature.replace('\\n', '<br>')
+                                birthday_message = f"{email_template.template_body}".replace('employe_name' , request.user.name).replace('tempalte_signature', signature_text)
+                                sub = email_template.subject + request.user.name
+                                # Create the email message object for HTML content
+                                birthday_email = EmailMultiAlternatives(
+                                    sub, 
+                                    "",    
+                                    'simply2cloud@gmail.com',  
+                                    [user_email]            
                                 )
-
-                                # Send the email
+                                
+                                # Attach the HTML content
+                                birthday_email.attach_alternative(birthday_message, "text/html")
                                 birthday_email.send()
-
-                            except EmailTemplate.DoesNotExist:
-                                # Handle the case where the email template does not exist
-                                print("EmailTemplate with ID 1 does not exist.")
                             except Exception as e:
                                 # Handle other possible exceptions
                                 print(f"An error occurred: {e}")
@@ -136,7 +135,7 @@ class CheckInView(APIView):
                     except Exception as e:
                         print("email failed")
                         print(e)
-                    return Response({"attendence_id" : attendence.id}, status=status.HTTP_200_OK)
+                    return Response({"attendence_id" : "attendence.id"}, status=status.HTTP_200_OK)
                 else:
                     if attendence_serializer.errors.get("non_field_errors"):
                         return Response({'error': "You have already checked in today"}, status=status.HTTP_400_BAD_REQUEST)
