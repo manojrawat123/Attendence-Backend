@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from datetime import date, timedelta
 from django.core.exceptions import ValidationError
+from mybrand.models import Brand
 
 
 def validate_date_of_birth(value):
@@ -58,10 +59,11 @@ class EmployeeUser(AbstractBaseUser):
             validate_date_of_joning
         ],null=True, blank=True
     )
-    role = models.CharField(max_length = 225,null=True, blank=True)
+    role = models.CharField(max_length = 225,null = True, blank = True)
     is_superuser = models.BooleanField(default = False)
     is_active = models.BooleanField(default = False)
     is_admin = models.BooleanField(default = False)
+    brand_name = models.ForeignKey(Brand, on_delete=models.CASCADE, null=True, blank=True)
     user_type = models.CharField(max_length=225, choices = [
         ("Intern", "Intern"),
         ("Employee", "Employee"),
@@ -70,7 +72,6 @@ class EmployeeUser(AbstractBaseUser):
         ("Teacher", "Teacher")
     ],null=True, blank=True)
     objects = EmployeeUserManager()
-
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name", "phone"]
     def __str__(self):

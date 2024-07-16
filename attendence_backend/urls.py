@@ -18,6 +18,8 @@ from django.urls import path
 from employee.views import MyEmployeeLoginView, CheckEmailApi, CreateEmployeeUserView,GetUserInfoAdmin, ProfileView
 from attendence_tracer.views import CheckInView, GetDataMonthWise
 from leave.views import GetLeaveApiView
+from batch.views import BatchGetView
+from student.views import StudentApiView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,4 +34,8 @@ urlpatterns = [
     path('get_employee_detail/', GetUserInfoAdmin.as_view(), name = "Get User Information"),
     path('get_month_data/', GetDataMonthWise.as_view(), name = "Get Month Data"),
     path('get_month_data/<int:id>/', GetDataMonthWise.as_view(), name = "Get Month Data"),
+    path('batch/', BatchGetView.as_view(), name = "batch-get-view"),
+    path('batch/<int:id>/', BatchGetView.as_view(), name = "batch-update-delete-view"),
+    path('student/', StudentApiView.as_view(), name = "student-get-view"),
+    path('student/<int:id>/', StudentApiView.as_view(), name = "student-update-delete-view"),
 ]

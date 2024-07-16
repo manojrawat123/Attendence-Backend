@@ -40,11 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'attendence_tracer',
-    'brand',
     'employee',
     'holiday',
     'leave',
-    'emailtemplate'
+    'emailtemplate',
+    'mybrand',
+    'student',
+    'batch'
 ]
 
 MIDDLEWARE = [
