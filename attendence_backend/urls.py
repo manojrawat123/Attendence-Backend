@@ -20,6 +20,7 @@ from attendence_tracer.views import CheckInView, GetDataMonthWise
 from leave.views import GetLeaveApiView
 from batch.views import BatchGetView
 from student.views import StudentApiView
+from studentattendence.views import StudentAttendenceView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -38,4 +39,6 @@ urlpatterns = [
     path('batch/<int:id>/', BatchGetView.as_view(), name = "batch-update-delete-view"),
     path('student/', StudentApiView.as_view(), name = "student-get-view"),
     path('student/<int:id>/', StudentApiView.as_view(), name = "student-update-delete-view"),
+    path('studentattendence/', StudentAttendenceView.as_view(), name = "student-update-delete-view"),
+    path('studentattendence/<int:id>/', StudentAttendenceView.as_view(), name = "student-update-delete-view"),
 ]

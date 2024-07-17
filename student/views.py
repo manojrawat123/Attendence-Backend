@@ -20,12 +20,18 @@ class StudentApiView(APIView):
             if id is not None:
                 if request.user.is_admin:
                     student = Student.objects.filter(Q(batch_id = id) & Q(active = True))
+                    batch = BatchModel.objects.filter(Q(active = True))
                 else:
                     student = Student.objects.filter(Q(batch_id = id) & Q(active = True) & Q(batch_id__assigned_to = request.user.id))
+                    batch = BatchModel.objects.filter(Q(active = True) & Q(assigned_to = request.user.id))
+                batch_serializer = BatchSerializer(batch, many = True)
                 student_serializer = StudentSerialzer(student, many = True)
                 for i in student_serializer.data:
-                    i['batch_id'] = BatchModel.objects.get(id = i['batch_id']).batch_name
-                return Response(student_serializer.data, status=status.HTTP_200_OK)
+                    i['batch_name'] = BatchModel.objects.get(id = i['batch_id']).batch_name
+                return Response({
+                                    'student' : student_serializer.data,
+                                    'batch' : batch_serializer.data
+                                }, status=status.HTTP_200_OK)
             if request.GET.get('page') == 'page':
                 if request.user.is_admin:
                     batch =  BatchModel.objects.filter(active = True)
@@ -44,10 +50,15 @@ class StudentApiView(APIView):
                 }, status=status.HTTP_200_OK)
             else:
                 student = Student.objects.filter(Q(active = True)) if request.user.is_admin else  Student.objects.filter(Q(active = True) & (Q(batch_id__assigned_to = request.user.id)))
+                batch =  BatchModel.objects.filter(active = True) if request.user.is_admin else BatchModel.objects.filter(Q(active = True) & Q(assigned_to = request.user.id))
+                batch_serializer = BatchSerializer(batch, many = True)
                 student_serializer = StudentSerialzer(student , many = True)
                 for i in student_serializer.data:
-                    i['batch_id'] = BatchModel.objects.get(id = i['batch_id']).batch_name
-                return Response(student_serializer.data, status=status.HTTP_200_OK)
+                    i['batch_name'] = BatchModel.objects.get(id = i['batch_id']).batch_name
+                return Response({
+                    'student' : student_serializer.data,
+                    'batch' : batch_serializer.data
+                    }, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({"error" : "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -88,3 +99,4 @@ class StudentApiView(APIView):
         except Exception as e:
             print(e)
             return Response({ "error" : "Internal Server Error" }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

@@ -25,13 +25,14 @@ class BatchGetView(APIView):
                     brand = Brand.objects.filter(id = request.user.brand.id)
                 brand_serializer = BrandSerializer(brand, many = True)
                 employee_serializer = MyEmployeeSerializer(employee, many = True)
-                return Response({
+                return Response(
+                {
                     "user" : employee_serializer.data,
                     "brand" : brand_serializer.data
                 }, status=status.HTTP_200_OK)
             else:
                 batch = BatchModel.objects.filter() if request.user.is_admin else  BatchModel.objects.filter((Q(assigned_to = request.user.id)))
-                batch_serializer = BatchSerializer(batch , many = True)
+                batch_serializer = BatchSerializer(batch, many = True)
                 for i in batch_serializer.data:
                     i['teacher'] = EmployeeUser.objects.get(id = i['assigned_to']).name
                     i['brand_name'] = Brand.objects.get(id = i['brand']).brand_name

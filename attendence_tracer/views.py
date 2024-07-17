@@ -93,7 +93,7 @@ class CheckInView(APIView):
                 "employee_user" : request.data.get("user")
                 })
                 if attendence_serializer.is_valid():
-                    # attendence = attendence_serializer.save()
+                    attendence = attendence_serializer.save()
                     try:
                         name = request.user.name
                         today = timezone.now().date()
@@ -135,7 +135,7 @@ class CheckInView(APIView):
                     except Exception as e:
                         print("email failed")
                         print(e)
-                    return Response({"attendence_id" : "attendence.id"}, status=status.HTTP_200_OK)
+                    return Response({"attendence_id" : attendence.id}, status=status.HTTP_200_OK)
                 else:
                     if attendence_serializer.errors.get("non_field_errors"):
                         return Response({'error': "You have already checked in today"}, status=status.HTTP_400_BAD_REQUEST)
