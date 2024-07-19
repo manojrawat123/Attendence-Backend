@@ -51,8 +51,11 @@ class StudentApiView(APIView):
                     "batch" : batch_serializer.data,
                     "employee" : employee_serializer.data
                 }, status=status.HTTP_200_OK)
-            else:
-                student = Student.objects.filter(Q(active = True)) if request.user.is_admin else  Student.objects.filter(Q(active = True) & (Q(batch_id__assigned_to = request.user.id)))
+            elif(request.GET.get('display')):
+                batch_id = request.GET.get('batch_id')
+                if batch_id is None:
+                    return Response({"error" : "Batch Id is not provided"}, status=status.HTTP_400_BAD_REQUEST)
+                student = Student.objects.filter(Q(active = True) & Q(batch_id =batch_id )) if request.user.is_admin else  Student.objects.filter(Q(active = True)  & Q(batch_id = batch_id ) & (Q(batch_id__assigned_to = request.user.id)))
                 batch =  BatchModel.objects.filter(active = True) if request.user.is_admin else BatchModel.objects.filter(Q(active = True) & Q(assigned_to = request.user.id))
                 batch_serializer = BatchSerializer(batch, many = True)
                 student_serializer = StudentSerialzer(student , many = True)
@@ -62,6 +65,7 @@ class StudentApiView(APIView):
                     'student' : student_serializer.data,
                     'batch' : batch_serializer.data
                     }, status=status.HTTP_200_OK)
+            return Response({'error' : "Invalid Response"})
         except Exception as e:
             print(e)
             return Response({"error" : "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
