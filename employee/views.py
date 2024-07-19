@@ -18,8 +18,10 @@ from attendence_tracer.models import Attendence
 from datetime import date
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password
+from employee.ForgotEmailSenderFunc import sendPasswordResetEmail
 
-# Create your views here.
+# Create your views here. 
 def get_token_for_user(user):
     refresh = RefreshToken.for_user(user)
 
@@ -128,3 +130,43 @@ class GetUserInfoAdmin(APIView):
             return Response(employee_serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error" : "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ForgotPassword(APIView):
+    def post(self , request, id = None):
+        try:
+            user = EmployeeUser.objects.get(Q(email = request.data.get("email")) & Q(is_active = True))
+            domain_name = 'https://simply-2-cloud-attendence.vercel.app'
+            if user is None:
+                return Response({"error" : "Email Didn't exist"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                sendPasswordResetEmail(user, domain_name)
+                return Response({"message" : "Reset Password Link Send to your email"},status=status.HTTP_200_OK)
+        except Exception as e: 
+            print(e)
+            return Response({"error" : f'{e}'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class ResetPassword(APIView):
+    def post(self , request, userid_encode = None,token = None):
+        try:
+            activate = request.data.get("activate")
+            password = request.data.get('password')
+            pk = urlsafe_base64_decode(userid_encode)
+            print(pk)
+            user = EmployeeUser.objects.get(pk= pk)
+            if default_token_generator.check_token(user,token):
+                print(password)
+                h_password = make_password(password)
+                print(h_password)
+                serializer = MyEmployeeSerializer(user, data={"password" : h_password}, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response({"message": "Password Reset Successfully"}, status=status.HTTP_200_OK)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error" : "Not Authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            print(e)
+            return Response({"error" : "Internal Server Error"}, status = status.HTTP_500_INTERNAL_SERVER_ERROR) 
+
+

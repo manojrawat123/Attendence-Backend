@@ -165,7 +165,7 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'otp@simply2cloud.com'
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_PASSWORD = "fuck_you"
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

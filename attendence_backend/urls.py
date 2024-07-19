@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from employee.views import MyEmployeeLoginView, CheckEmailApi, CreateEmployeeUserView,GetUserInfoAdmin, ProfileView
+from employee.views import MyEmployeeLoginView, CheckEmailApi, CreateEmployeeUserView,GetUserInfoAdmin, ProfileView,ForgotPassword, ResetPassword
 from attendence_tracer.views import CheckInView, GetDataMonthWise
 from leave.views import GetLeaveApiView
 from batch.views import BatchGetView
@@ -41,4 +41,7 @@ urlpatterns = [
     path('student/<int:id>/', StudentApiView.as_view(), name = "student-update-delete-view"),
     path('studentattendence/', StudentAttendenceView.as_view(), name = "student-update-delete-view"),
     path('studentattendence/<int:id>/', StudentAttendenceView.as_view(), name = "student-update-delete-view"),
+    path('reset-password/<userid_encode>/<token>/', ResetPassword.as_view(), name="Reset Password"),
+    path('forgetpassword/', ForgotPassword.as_view(), name="forgot password email"),
+
 ]
