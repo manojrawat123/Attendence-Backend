@@ -10,6 +10,9 @@ from student.models import Student
 from student.serializer import StudentSerialzer
 from employee.models import EmployeeUser
 from employee.serializers import MyEmployeeSerializer
+from studentattendence.models import Attendance
+from studentattendence.serializer import StudentAttendenceSerializer
+from django.utils import timezone
 
 
 # Create your views here.
@@ -64,9 +67,24 @@ class StudentApiView(APIView):
             return Response({"error" : "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def post(self, request, id = None):
         try:    
-            student_serializer = StudentSerialzer(data={**request.data, "added_by" : request.user.id})
+            student_serializer = StudentSerialzer(data={**request.data, "added_by" : request.user.id})            
             if student_serializer.is_valid():
-                student_serializer.save()
+                student = student_serializer.save()
+                try:
+                    attendence_obj = Attendance.objects.filter(Q(batch_id = request.data.get('batch_id')) & Q(date = timezone.now().date()))
+                    attendence =  attendence_obj if request.user.is_admin else attendence_obj.filter(Q(batch_id__assigned_to = request.user.id))
+                    attendence_serializer = StudentAttendenceSerializer(attendence, many = True)
+                    if len(attendence_serializer.data) != 0:
+                        new_student_attendence_serialzer = StudentAttendenceSerializer(data={'student' : student.id,
+                                                                                         'batch_id' : request.data.get('batch_id'),
+                                                                                         'attendance_status' : "Present"
+                                                                                         })
+                        if new_student_attendence_serialzer.is_valid():
+                            new_student_attendence_serialzer.save()
+                            return Response(new_student_attendence_serialzer.errors, status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    print(e)
+
                 return Response({
                     "message" : "Student Added Successfully"
                 }, status=status.HTTP_200_OK)

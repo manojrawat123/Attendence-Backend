@@ -22,7 +22,7 @@ class BatchGetView(APIView):
                     brand = Brand.objects.all()
                 else:
                     employee = EmployeeUser.objects.filter(id = request.user.id)
-                    brand = Brand.objects.filter(id = request.user.brand.id)
+                    brand = Brand.objects.filter(id = request.user.brand_name.id)
                 brand_serializer = BrandSerializer(brand, many = True)
                 employee_serializer = MyEmployeeSerializer(employee, many = True)
                 return Response(
