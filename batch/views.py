@@ -31,7 +31,7 @@ class BatchGetView(APIView):
                     "brand" : brand_serializer.data
                 }, status=status.HTTP_200_OK)
             else:
-                batch = BatchModel.objects.filter() if request.user.is_admin else  BatchModel.objects.filter((Q(assigned_to = request.user.id)))
+                batch = BatchModel.objects.filter(active = True) if request.user.is_admin else  BatchModel.objects.filter(( Q(assigned_to = request.user.id) ) & Q(active = True))
                 batch_serializer = BatchSerializer(batch, many = True)
                 for i in batch_serializer.data:
                     i['teacher'] = EmployeeUser.objects.get(id = i['assigned_to']).name
@@ -73,6 +73,7 @@ class BatchGetView(APIView):
         except Exception as e:
             print(e)
             return Response({"error" : "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def delete(self, request, id = None):
         try:
             batch = BatchModel.objects.get(id = id)
@@ -82,3 +83,5 @@ class BatchGetView(APIView):
         except Exception as e:
             print(e)
             return Response({ "error" : "Internal Server Error" }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+

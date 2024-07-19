@@ -9,7 +9,16 @@ from batch.models import BatchModel
 from studentattendence.models import Attendance
 from studentattendence.serializer import StudentAttendenceSerializer
 from django.utils import timezone
+from emailtemplate.models import EmailTemplate
+from django.core.mail import EmailMultiAlternatives
+from datetime import datetime
 
+
+
+today = datetime.today()
+
+            # Format the date in a readable format
+formatted_date = today.strftime("%A, %B %d, %Y")
 
 # Create your views here.
 class StudentAttendenceView(APIView):
@@ -88,6 +97,8 @@ class StudentAttendenceView(APIView):
 
     def post(self, request , id = None):
         try:
+            batch = BatchModel.objects.get(id = request.data.get('batch_id'))
+            
             for i in request.data.get('present_student'):
                 attendence_serializer = StudentAttendenceSerializer(data={
                     'batch_id' : request.data.get('batch_id'),
@@ -106,6 +117,25 @@ class StudentAttendenceView(APIView):
                     })
                 if attendence_serializer.is_valid():
                     attendence_serializer.save()
+                    try:
+                        email = EmailTemplate.objects.get(id = 2)
+                        student = Student.objects.get(id = i)
+                        
+                        subject = email.subject.replace('batch_name', batch.batch_name).replace('brand_name', request.user.brand_name.brand_name)
+                        message = email.template_body.replace('student', student.student_name).replace('batch_name' , batch.batch_name).replace('today', formatted_date).replace('brand_name', request.user.brand_name.brand_name) + "\n" + email.signature
+                        
+                        email = EmailMultiAlternatives(
+                                    subject, 
+                                    "",    
+                                    'simply2cloud@gmail.com',  
+                                    # ['bahimunna457@gmail.com']
+                                    [student.student_email]            
+                                )
+                        # Attach the HTML content
+                        email.attach_alternative(message, "text/html")
+                        email.send()
+                    except Exception as e:
+                        print(e)
                 else:
                     print('error')
             return Response("Data Updated Successfully!!")      
@@ -115,12 +145,29 @@ class StudentAttendenceView(APIView):
         
     def put(self, request, id = None):
         try:
-            print(id)
             student_attendence = Attendance.objects.get(id = id)
             attendence_serializer = StudentAttendenceSerializer(student_attendence, data=request.data, partial= True)
             if attendence_serializer.is_valid():
                 attendence_serializer.save()
-                print(student_attendence.attendance_status)
+                if (student_attendence.attendance_status == "Absent"):
+                    try:
+                            email = EmailTemplate.objects.get(id = 2)
+                            
+                            subject = email.subject.replace('batch_name', student_attendence.batch_id.batch_name).replace('brand_name', request.user.brand_name.brand_name)
+                            message = email.template_body.replace('student', student_attendence.student.student_name).replace('batch_name' , student_attendence.batch_id.batch_name).replace('today', formatted_date).replace('brand_name', request.user.brand_name.brand_name) + "\n" + email.signature
+                            
+                            email = EmailMultiAlternatives(
+                                        subject, 
+                                        "",    
+                                        'simply2cloud@gmail.com',  
+                                        # ['bahimunna457@gmail.com']
+                                        [student_attendence.student.student_email]            
+                                    )
+                            # Attach the HTML content
+                            email.attach_alternative(message, "text/html")
+                            email.send()
+                    except Exception as e:
+                        print(e)
                 print(request.data)
                 return Response({"message" : "Updated Successfully"},status=status.HTTP_200_OK)
             else:

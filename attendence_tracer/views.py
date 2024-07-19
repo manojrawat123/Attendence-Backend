@@ -119,8 +119,7 @@ class CheckInView(APIView):
                                 birthday_email.send()
                             except Exception as e:
                                 # Handle other possible exceptions
-                                print(f"An error occurred: {e}")
-                            
+                                print(f"An error occurred: {e}")                            
                         distance = is_valid["str_dis"]
                         if is_valid["valid"]:
                             email_1 = EmailMessage(f"{name} ", f"Checkin Successfully at {time} Distance from the office -: {distance} meters", 'simply2cloud@gmail.com',["vikas.sharma@simply2cloud.com", "positive.mind.123456789@gmail.com"])
