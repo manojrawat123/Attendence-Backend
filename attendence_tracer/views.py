@@ -108,18 +108,18 @@ class CheckInView(APIView):
                                 sub = email_template.subject + request.user.name
                                 # Create the email message object for HTML content
                                 birthday_email = EmailMultiAlternatives(
-                                    sub, 
-                                    "",    
-                                    'simply2cloud@gmail.com',  
-                                    [user_email]            
+                                    sub,
+                                    "",
+                                    'simply2cloud@gmail.com',
+                                    [user_email]
                                 )
-                                
+
                                 # Attach the HTML content
                                 birthday_email.attach_alternative(birthday_message, "text/html")
                                 birthday_email.send()
                             except Exception as e:
                                 # Handle other possible exceptions
-                                print(f"An error occurred: {e}")                            
+                                print(f"An error occurred: {e}")
                         distance = is_valid["str_dis"]
                         if is_valid["valid"]:
                             email_1 = EmailMessage(f"{name} ", f"Checkin Successfully at {time} Distance from the office -: {distance} meters", 'simply2cloud@gmail.com',["vikas.sharma@simply2cloud.com", "positive.mind.123456789@gmail.com"])
@@ -127,7 +127,7 @@ class CheckInView(APIView):
                             email_1.send()
                             email_2.send()
                         else:
-                            email_1 = EmailMessage(f"{name} ", f"Checkin Successfully at {time} Distance from the office is more than 100 meters distance -: {distance} meters", 'simply2cloud@gmail.com',["vikas.sharma@simply2cloud.com", "positive.mind.123456789@gmail.com"])   
+                            email_1 = EmailMessage(f"{name} ", f"Checkin Successfully at {time} Distance from the office is more than 100 meters distance -: {distance} meters", 'simply2cloud@gmail.com',["vikas.sharma@simply2cloud.com", "positive.mind.123456789@gmail.com"])
                             email_2 = EmailMessage("Successfully Checked In!!", f"You checkin at {time}", 'simply2cloud@gmail.com',[user_email])
                             email_1.send()
                             email_2.send()
@@ -144,7 +144,7 @@ class CheckInView(APIView):
             return Response({"error": "You have already checked in today"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print(e)
-            return Response({"error" : "Internal server error" }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error" : "Cannot Get Your Location Properly" }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def get(self, request, id = None):
         if id is not None:
             if request.user.is_superuser or request.user.id == id:
