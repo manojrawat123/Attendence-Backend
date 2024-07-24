@@ -104,7 +104,7 @@ class ProfileView(APIView):
         try:
             today = date.today()
             user = EmployeeUser.objects.get(id = request.user.id)
-            user_serilaizer = EmployeeRegisterSerializer(user)
+            user_serilaizer = MyEmployeeSerializer(user)
             try:
                 attendence = Attendence.objects.get(employee_user = request.user.id, date=today)
                 if attendence.check_in_time and attendence.check_out_time is None:
