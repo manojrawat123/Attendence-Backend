@@ -24,6 +24,11 @@ class MyEmployeeSerializer(serializers.ModelSerializer):
         model = EmployeeUser
         fields = ["name", "email", "id"]
 
+class ForgotPasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeUser
+        fields = ["password"]
+
 
 class MyUserLoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length = 225)
