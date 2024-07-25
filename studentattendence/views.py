@@ -29,7 +29,7 @@ class StudentAttendenceView(APIView):
             batch_id = request.GET.get('batch')
             if request.GET.get('batch') is not None:
                 if request.GET.get('page') == 'display':
-                    student =  Student.objects.filter(Q(batch_id = batch_id)) if request.user.is_admin else  Student.objects.filter(Q(batch_id = request.GET.get('batch')) & Q(batch_id__assigned_to = request.user.id)) 
+                    student =  Student.objects.filter(Q(batch_id = batch_id)) if request.user.is_admin else  Student.objects.filter(Q(batch_id = request.GET.get('batch')) & Q(batch_id__assigned_to = request.user.id))
                     student_serializer = StudentSerialzer(student, many = True)
                     return Response({
                         "student" : student_serializer.data
@@ -40,7 +40,7 @@ class StudentAttendenceView(APIView):
                         Q(active = True) & Q(batch_id = batch_id)) if request.user.is_admin else Student.objects.filter(
                         Q(active = True) & Q(batch_id = batch_id) & Q(batch_id__assigned_to = request.user.id))
                     batch_student_serializer = StudentSerialzer(batch_student, many = True)
-                    
+
                     # Attendence Obj
                     attendence_obj = Attendance.objects.filter(Q(batch_id = batch_id) & Q(date = timezone.now().date()))
                     attendence =  attendence_obj if request.user.is_admin else attendence_obj.filter(Q(batch_id__assigned_to = request.user.id))
@@ -60,7 +60,7 @@ class StudentAttendenceView(APIView):
                             'status' : 'done',
                             'batch_student' : batch_student_serializer.data,
                             "attendence"  : attendence_serializer.data
-                        })                     
+                        })
 
                 elif request.GET.get('page') == 'attendenceget':
                     student = Student.objects.filter(Q(batch_id=batch_id)) if request.user.is_admin else Student.objects.filter(
@@ -98,12 +98,12 @@ class StudentAttendenceView(APIView):
     def post(self, request , id = None):
         try:
             batch = BatchModel.objects.get(id = request.data.get('batch_id'))
-            
+
             for i in request.data.get('present_student'):
                 attendence_serializer = StudentAttendenceSerializer(data={
                     'batch_id' : request.data.get('batch_id'),
                     'student' : i,
-                    'attendance_status' : "Present"  
+                    'attendance_status' : "Present"
                     })
                 if attendence_serializer.is_valid():
                     attendence_serializer.save()
@@ -113,23 +113,23 @@ class StudentAttendenceView(APIView):
                 attendence_serializer = StudentAttendenceSerializer(data={
                     'batch_id' : request.data.get('batch_id'),
                     'student' : i,
-                    'attendance_status' : "Absent"  
+                    'attendance_status' : "Absent"
                     })
                 if attendence_serializer.is_valid():
                     attendence_serializer.save()
                     try:
                         email = EmailTemplate.objects.get(id = 2)
                         student = Student.objects.get(id = i)
-                        
+
                         subject = email.subject.replace('batch_name', batch.batch_name).replace('brand_name', request.user.brand_name.brand_name)
-                        message = email.template_body.replace('student', student.student_name).replace('batch_name' , batch.batch_name).replace('today', formatted_date).replace('brand_name', request.user.brand_name.brand_name) + "\n" + email.signature
-                        
+                        message = email.template_body.replace('student', student.student_name).replace('batch_name' , batch.batch_name).replace('today', formatted_date).replace('brand_name', request.user.brand_name.brand_name) + "\n" + email.signature.replace('brand_name', request.user.brand_name.brand_name)
+
                         email = EmailMultiAlternatives(
-                                    subject, 
-                                    "",    
-                                    'simply2cloud@gmail.com',  
+                                    subject,
+                                    "",
+                                    'simply2cloud@gmail.com',
                                     # ['bahimunna457@gmail.com']
-                                    [student.student_email]            
+                                    [student.student_email]
                                 )
                         # Attach the HTML content
                         email.attach_alternative(message, "text/html")
@@ -138,11 +138,11 @@ class StudentAttendenceView(APIView):
                         print(e)
                 else:
                     print('error')
-            return Response("Data Updated Successfully!!")      
+            return Response("Data Updated Successfully!!")
         except Exception as e:
             print(e)
             return Response({'error' : "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
     def put(self, request, id = None):
         try:
             student_attendence = Attendance.objects.get(id = id)
@@ -152,16 +152,16 @@ class StudentAttendenceView(APIView):
                 if (student_attendence.attendance_status == "Absent"):
                     try:
                             email = EmailTemplate.objects.get(id = 2)
-                            
+
                             subject = email.subject.replace('batch_name', student_attendence.batch_id.batch_name).replace('brand_name', request.user.brand_name.brand_name)
-                            message = email.template_body.replace('student', student_attendence.student.student_name).replace('batch_name' , student_attendence.batch_id.batch_name).replace('today', formatted_date).replace('brand_name', request.user.brand_name.brand_name) + "\n" + email.signature
-                            
+                            message = email.template_body.replace('student', student_attendence.student.student_name).replace('batch_name' , student_attendence.batch_id.batch_name).replace('today', formatted_date).replace('brand_name', request.user.brand_name.brand_name) + "\n" + email.signature.replace('brand_name', request.user.brand_name.brand_name)
+
                             email = EmailMultiAlternatives(
-                                        subject, 
-                                        "",    
-                                        'simply2cloud@gmail.com',  
+                                        subject,
+                                        "",
+                                        'simply2cloud@gmail.com',
                                         # ['bahimunna457@gmail.com']
-                                        [student_attendence.student.student_email]            
+                                        [student_attendence.student.student_email]
                                     )
                             # Attach the HTML content
                             email.attach_alternative(message, "text/html")
