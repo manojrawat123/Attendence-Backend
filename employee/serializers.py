@@ -23,7 +23,7 @@ class MyEmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployeeUser
         fields = ["name", "email", "id"]
-
+        
 class ForgotPasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployeeUser

@@ -26,8 +26,8 @@ def attendance_data_func_month(user, month, year):
         check_out_time = None
 
         # Check if there's an attendance record for this day
-        attendance_record = attendance_records.filter(date=date).first()
-
+        attendance_record = attendance_records.filter(date=date).first()        
+       
         if attendance_record:
             check_in_time = attendance_record.check_in_time
             check_out_time = attendance_record.check_out_time
@@ -39,6 +39,8 @@ def attendance_data_func_month(user, month, year):
             "checkoutTime": check_out_time.strftime("%I:%M%p") if check_out_time else None,
             "leave": leave
         }
+        
         # Add attendance data to the main dictionary
         attendance_month_data[date.strftime("%d %b %Y")] = day_attendance_data    
+        
     return attendance_month_data

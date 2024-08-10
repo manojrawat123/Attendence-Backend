@@ -1,4 +1,4 @@
-from employee.serializers import MyEmployeeSerializer, MyUserLoginSerializer,EmployeeRegisterSerializer,ForgotPasswordSerializer
+from employee.serializers import MyEmployeeSerializer, MyUserLoginSerializer,EmployeeRegisterSerializer
 from employee.models import EmployeeUser 
 from rest_framework.views import APIView
 from django.core.mail import EmailMessage
@@ -157,7 +157,7 @@ class ResetPassword(APIView):
                 print(password)
                 h_password = make_password(password)
                 print(h_password)
-                serializer = ForgotPasswordSerializer(user, data={"password" : h_password}, partial=True)
+                serializer = MyEmployeeSerializer(user, data={"password" : h_password}, partial=True)
                 if serializer.is_valid():
                     serializer.save()
                     return Response({"message": "Password Reset Successfully"}, status=status.HTTP_200_OK)

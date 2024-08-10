@@ -6,3 +6,4 @@ class EmailTemplate(models.Model):
     subject = models.CharField(max_length=300)
     template_body = models.TextField()
     signature = models.TextField() 
+    display = models.BooleanField(default=False)

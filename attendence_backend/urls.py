@@ -21,6 +21,7 @@ from leave.views import GetLeaveApiView
 from batch.views import BatchGetView
 from student.views import StudentApiView
 from studentattendence.views import StudentAttendenceView
+from studentmailer.views import SendMailStudentView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -43,5 +44,6 @@ urlpatterns = [
     path('studentattendence/<int:id>/', StudentAttendenceView.as_view(), name = "student-update-delete-view"),
     path('reset-password/<userid_encode>/<token>/', ResetPassword.as_view(), name="Reset Password"),
     path('forgetpassword/', ForgotPassword.as_view(), name="forgot password email"),
+    path('sendmail/', SendMailStudentView.as_view(), name="forgot password email"),
 
 ]
