@@ -22,7 +22,7 @@ class EmployeeRegisterSerializer(serializers.ModelSerializer):
 class MyEmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployeeUser
-        fields = ["name", "email", "id"]
+        fields = ["name", "email", "id","address", "date_of_joining", "phone", "role" ]
         
 class ForgotPasswordSerializer(serializers.ModelSerializer):
     class Meta:

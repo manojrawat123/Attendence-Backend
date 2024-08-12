@@ -27,6 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', MyEmployeeLoginView.as_view(), name= "login"),
     path('profile/', ProfileView.as_view(), name="profile"),
+    path('profile/<int:id>/', ProfileView.as_view(), name="profile"),
     path('register/', CreateEmployeeUserView.as_view(), name = "register"),
     path('emailcheck/', CheckEmailApi.as_view(), name = "Email Check"),
     path('checkin/', CheckInView.as_view(), name = "Check In User"),

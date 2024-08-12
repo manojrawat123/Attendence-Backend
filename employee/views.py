@@ -108,15 +108,28 @@ class ProfileView(APIView):
             try:
                 attendence = Attendence.objects.get(employee_user = request.user.id, date=today)
                 if attendence.check_in_time and attendence.check_out_time is None:
-                    print(attendence.check_in_time)
                     current_time = timezone.localtime(timezone.now()).time()
-                    # Calculate the time difference in seconds
                     time_diff_seconds = (datetime.combine(datetime.today(), current_time) - datetime.combine(datetime.today(), attendence.check_in_time)).total_seconds()
                     show_checkout = True if time_diff_seconds > 14400 else False
                     return Response({"user_data" : user_serilaizer.data, "checkin_id" : attendence.id, "show_checkout_button" : show_checkout})
             except Exception as e:
                 print(e)
             return Response({"user_data" : user_serilaizer.data})
+        except Exception as e:
+            print(e)
+            return Response({"error" : "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def put(self, request, id = None):
+        try:
+            if id is None and request.user.id != id:
+                return Response({"error" : "Method Not Allowed"})
+            else:
+                user = EmployeeUser.objects.get(id = id)
+                user_serializer = MyEmployeeSerializer(user, data=request.data, partial=True)
+                if user_serializer.is_valid():
+                    user_serializer.save()
+                    return Response({"message" : "Updated Successfully!"}, status=status.HTTP_200_OK)                
+                else:
+                    return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print(e)
             return Response({"error" : "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
